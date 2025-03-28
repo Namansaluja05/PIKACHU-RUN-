@@ -19,6 +19,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            overflow: hidden;
         }
         h1 {
             font-size: 36px;
@@ -29,6 +30,9 @@
         canvas {
             display: block;
             border-bottom: 2px solid black;
+            width: 90%;
+            max-width: 800px;
+            height: auto;
         }
         #scoreBoard {
             font-size: 24px;
@@ -82,11 +86,10 @@
         let pikachu = {
             x: 50,
             y: 180,
-            width: 60,
-            height: 60,
+            width: 80,
+            height: 80,
             velocityY: 0,
-            gravity: 0.5,
-            isJumping: false
+            gravity: 0.5
         };
         
         let obstacles = [];
@@ -116,16 +119,12 @@
             
             if (pikachu.y >= 180) {
                 pikachu.y = 180;
-                pikachu.isJumping = false;
             }
             
             obstacles.forEach((obstacle, index) => {
                 obstacle.x -= gameSpeed;
                 if (obstacle.x + obstacle.width < 0) {
                     obstacles.splice(index, 1);
-                    score++;
-                    scoreBoard.innerText = "Score: " + score;
-                    gameSpeed = 5 + Math.floor(score / 10); // Increase speed as score increases
                 }
                 if (
                     pikachu.x < obstacle.x + obstacle.width &&
@@ -137,6 +136,9 @@
                     retryButton.style.display = "block";
                 }
             });
+            
+            scoreBoard.innerText = "Score: " + score;
+            gameSpeed = 5 + Math.floor(score / 10);
             
             if (Math.random() < 0.008) {
                 obstacles.push({ x: canvas.width, y: 200, width: 50, height: 50 });
@@ -150,9 +152,14 @@
         }
         
         document.addEventListener("keydown", (event) => {
-            if (event.code === "Space" && !pikachu.isJumping) {
+            if (event.code === "Space" && pikachu.y === 180) {
                 pikachu.velocityY = -12;
-                pikachu.isJumping = true;
+            }
+        });
+        
+        document.addEventListener("touchstart", () => {
+            if (pikachu.y === 180) {
+                pikachu.velocityY = -12;
             }
         });
         
