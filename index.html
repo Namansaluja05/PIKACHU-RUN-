@@ -125,6 +125,7 @@
                 obstacle.x -= gameSpeed;
                 if (obstacle.x + obstacle.width < 0) {
                     obstacles.splice(index, 1);
+                    score++;
                 }
                 if (
                     pikachu.x < obstacle.x + obstacle.width &&
