@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pikachu Run</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: url('background.jpg') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px #000;
+        }
+        canvas {
+            display: block;
+            border-bottom: 2px solid black;
+        }
+        #scoreBoard {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffcc00;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 10px;
+            text-shadow: 2px 2px 4px #000;
+        }
+        #retryButton {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ffcc00;
+            color: black;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        #retryButton:hover {
+            background-color: #ff9900;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -55%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pikachu Run</h1>
+    <div id="scoreBoard">Score: 0</div>
+    <canvas id="gameCanvas" width="800" height="300"></canvas>
+    <button id="retryButton" onclick="restartGame()">Try Again</button>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreBoard = document.getElementById("scoreBoard");
+        const retryButton = document.getElementById("retryButton");
+        
+        const pikachuImg = new Image();
+        pikachuImg.src = "pikachu.png";
+        
+        const obstacleImg = new Image();
+        obstacleImg.src = "obstacle.png";
+        
+        let pikachu = {
+            x: 50,
+            y: 180,
+            width: 60,
+            height: 60,
+            velocityY: 0,
+            gravity: 0.5,
+            isJumping: false
+        };
+        
+        let obstacles = [];
+        let gameSpeed = 5;
+        let score = 0;
+        let gameOver = false;
+        
+        function drawPikachu() {
+            ctx.drawImage(pikachuImg, pikachu.x, pikachu.y, pikachu.width, pikachu.height);
+        }
+        
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+        }
+        
+        function updateGame() {
+            if (gameOver) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPikachu();
+            drawObstacles();
+            
+            pikachu.y += pikachu.velocityY;
+            pikachu.velocityY += pikachu.gravity;
+            
+            if (pikachu.y >= 180) {
+                pikachu.y = 180;
+                pikachu.isJumping = false;
+            }
+            
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x -= gameSpeed;
+                if (obstacle.x + obstacle.width < 0) {
+                    obstacles.splice(index, 1);
+                    score++;
+                    scoreBoard.innerText = "Score: " + score;
+                    gameSpeed = 5 + Math.floor(score / 10); // Increase speed as score increases
+                }
+                if (
+                    pikachu.x < obstacle.x + obstacle.width &&
+                    pikachu.x + pikachu.width > obstacle.x &&
+                    pikachu.y < obstacle.y + obstacle.height &&
+                    pikachu.y + pikachu.height > obstacle.y
+                ) {
+                    gameOver = true;
+                    retryButton.style.display = "block";
+                }
+            });
+            
+            if (Math.random() < 0.008) {
+                obstacles.push({ x: canvas.width, y: 200, width: 50, height: 50 });
+            }
+            
+            requestAnimationFrame(updateGame);
+        }
+        
+        function restartGame() {
+            location.reload();
+        }
+        
+        document.addEventListener("keydown", (event) => {
+            if (event.code === "Space" && !pikachu.isJumping) {
+                pikachu.velocityY = -12;
+                pikachu.isJumping = true;
+            }
+        });
+        
+        updateGame();
+    </script>
+</body>
+</html>
